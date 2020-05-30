@@ -140,6 +140,7 @@ def input_fn_builder(features, seq_length):
     })
 
     d = d.batch(batch_size=batch_size, drop_remainder=False)
+
     return d
 
   return input_fn
@@ -173,10 +174,12 @@ def model_fn_builder(bert_config, init_checkpoint, layer_indexes, use_tpu,
     (assignment_map,
      initialized_variable_names) = modeling.get_assignment_map_from_checkpoint(
          tvars, init_checkpoint)
+
     if use_tpu:
 
       def tpu_scaffold():
         tf.train.init_from_checkpoint(init_checkpoint, assignment_map)
+
         return tf.train.Scaffold()
 
       scaffold_fn = tpu_scaffold
@@ -184,8 +187,10 @@ def model_fn_builder(bert_config, init_checkpoint, layer_indexes, use_tpu,
       tf.train.init_from_checkpoint(init_checkpoint, assignment_map)
 
     tf.logging.info("**** Trainable Variables ****")
+
     for var in tvars:
       init_string = ""
+
       if var.name in initialized_variable_names:
         init_string = ", *INIT_FROM_CKPT*"
       tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape,
@@ -202,6 +207,7 @@ def model_fn_builder(bert_config, init_checkpoint, layer_indexes, use_tpu,
 
     output_spec = tf.estimator.tpu.TPUEstimatorSpec(
         mode=mode, predictions=predictions, scaffold_fn=scaffold_fn)
+
     return output_spec
 
   return model_fn
@@ -211,10 +217,12 @@ def convert_examples_to_features(examples, seq_length, tokenizer):
   """Loads a data file into a list of `InputBatch`s."""
 
   features = []
+
   for (ex_index, example) in enumerate(examples):
     tokens_a = tokenizer.tokenize(example.text_a)
 
     tokens_b = None
+
     if example.text_b:
       tokens_b = tokenizer.tokenize(example.text_b)
 
@@ -225,6 +233,7 @@ def convert_examples_to_features(examples, seq_length, tokenizer):
       _truncate_seq_pair(tokens_a, tokens_b, seq_length - 3)
     else:
       # Account for [CLS] and [SEP] with "- 2"
+
       if len(tokens_a) > seq_length - 2:
         tokens_a = tokens_a[0:(seq_length - 2)]
 
@@ -250,6 +259,7 @@ def convert_examples_to_features(examples, seq_length, tokenizer):
     input_type_ids = []
     tokens.append("[CLS]")
     input_type_ids.append(0)
+
     for token in tokens_a:
       tokens.append(token)
       input_type_ids.append(0)
@@ -270,6 +280,7 @@ def convert_examples_to_features(examples, seq_length, tokenizer):
     input_mask = [1] * len(input_ids)
 
     # Zero-pad up to the sequence length.
+
     while len(input_ids) < seq_length:
       input_ids.append(0)
       input_mask.append(0)
@@ -296,6 +307,7 @@ def convert_examples_to_features(examples, seq_length, tokenizer):
             input_ids=input_ids,
             input_mask=input_mask,
             input_type_ids=input_type_ids))
+
   return features
 
 
@@ -306,10 +318,13 @@ def _truncate_seq_pair(tokens_a, tokens_b, max_length):
   # one token at a time. This makes more sense than truncating an equal percent
   # of tokens from each, since if one sequence is very short then each token
   # that's truncated likely contains more information than a longer sequence.
+
   while True:
     total_length = len(tokens_a) + len(tokens_b)
+
     if total_length <= max_length:
       break
+
     if len(tokens_a) > len(tokens_b):
       tokens_a.pop()
     else:
@@ -323,12 +338,14 @@ def read_examples(input_file):
   with tf.gfile.GFile(input_file, "r") as reader:
     while True:
       line = tokenization.convert_to_unicode(reader.readline())
+
       if not line:
         break
       line = line.strip()
       text_a = None
       text_b = None
       m = re.match(r"^(.*) \|\|\| (.*)$", line)
+
       if m is None:
         text_a = line
       else:
@@ -337,6 +354,7 @@ def read_examples(input_file):
       examples.append(
           InputExample(unique_id=unique_id, text_a=text_a, text_b=text_b))
       unique_id += 1
+
   return examples
 
 
@@ -363,6 +381,7 @@ def main(_):
       examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
 
   unique_id_to_feature = {}
+
   for feature in features:
     unique_id_to_feature[feature.unique_id] = feature
 
@@ -379,6 +398,7 @@ def main(_):
       use_tpu=FLAGS.use_tpu,
       model_fn=model_fn,
       config=run_config,
+      train_batch_size=FLAGS.batch_size,
       predict_batch_size=FLAGS.batch_size)
 
   input_fn = input_fn_builder(
@@ -386,14 +406,17 @@ def main(_):
 
   with codecs.getwriter("utf-8")(tf.gfile.Open(FLAGS.output_file,
                                                "w")) as writer:
+
     for result in estimator.predict(input_fn, yield_single_examples=True):
       unique_id = int(result["unique_id"])
       feature = unique_id_to_feature[unique_id]
       output_json = collections.OrderedDict()
       output_json["linex_index"] = unique_id
       all_features = []
+
       for (i, token) in enumerate(feature.tokens):
         all_layers = []
+
         for (j, layer_index) in enumerate(layer_indexes):
           layer_output = result["layer_output_%d" % j]
           layers = collections.OrderedDict()
