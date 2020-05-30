@@ -408,6 +408,7 @@ def main(_):
                                                "w")) as writer:
 
     for result in estimator.predict(input_fn, yield_single_examples=True):
+      tf.logging.info("New result comming")
       unique_id = int(result["unique_id"])
       feature = unique_id_to_feature[unique_id]
       output_json = collections.OrderedDict()
