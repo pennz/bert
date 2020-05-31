@@ -379,8 +379,9 @@ def main(_):
   try:
     with open(path, "rb") as f:
       features= pickle.load(f)
+      tf.logging.info("Feature loaded")
   except Exception as e:
-      raise e
+    raise e
   # examples = read_examples(FLAGS.input_file)
 
   # features = convert_examples_to_features(
