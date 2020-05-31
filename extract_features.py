@@ -19,11 +19,11 @@ from __future__ import absolute_import, division, print_function
 import codecs
 import collections
 import json
+import pickle
 import re
 
 import tensorflow.compat.v1 as tf
 
-import kaggle_runner.utils.kernel_utils as utils
 import modeling
 import tokenization
 
@@ -296,8 +296,7 @@ def convert_examples_to_features(examples, seq_length, tokenizer):
       tf.logging.info("tokens: %s" % " ".join(
           [tokenization.printable_text(x) for x in tokens]))
       tf.logging.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
-      tf.logging.info("input_mask: %s" %
-                      " ".join([str(x) for x in input_mask]))
+      tf.logging.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
       tf.logging.info(
           "input_type_ids: %s" % " ".join([str(x) for x in input_type_ids]))
 
@@ -367,25 +366,24 @@ def main(_):
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
 
   tokenizer = tokenization.FullTokenizer(
-    vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
+      vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
 
   is_per_host = tf.estimator.tpu.InputPipelineConfig.PER_HOST_V2
   run_config = tf.estimator.tpu.RunConfig(
-    master=FLAGS.master,
-    tpu_config=tf.estimator.tpu.TPUConfig(
-        num_shards=FLAGS.num_tpu_cores,
-        per_host_input_for_training=is_per_host))
+      master=FLAGS.master,
+      tpu_config=tf.estimator.tpu.TPUConfig(
+          num_shards=FLAGS.num_tpu_cores,
+          per_host_input_for_training=is_per_host))
 
-  features = utils.get_obj_or_dump("toxic_commnent_text_features.pkl")
+  examples = read_examples(FLAGS.input_file)
 
-  if features is None:
-    examples = read_examples(FLAGS.input_file)
-    features = convert_examples_to_features(
+  features = convert_examples_to_features(
       examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
-    utils.get_obj_or_dump(
-      "toxic_commnent_text_features.pkl", default=features)
 
   unique_id_to_feature = {}
+
+  with open("features.pkl", "wb") as f:
+    pickle.dump(features, f)
 
   for feature in features:
     unique_id_to_feature[feature.unique_id] = feature
