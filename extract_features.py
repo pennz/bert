@@ -361,7 +361,6 @@ def read_examples(input_file):
 
 def main(_):
   import ipdb
-  ipdb.set_trace()
   tf.logging.set_verbosity(tf.logging.DEBUG)
 
   layer_indexes = [int(x) for x in FLAGS.layers.split(",")]
