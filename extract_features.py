@@ -387,6 +387,7 @@ def main(_):
       kernel_utils.get_obj_or_dump(
           "toxic_commnent_text_features.pkl", default=features)
 
+  ipdb.set_trace()
   unique_id_to_feature = {}
 
   for feature in features:
