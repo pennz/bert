@@ -23,6 +23,7 @@ import re
 
 import tensorflow.compat.v1 as tf
 
+import kaggle_runner.utils.kernel_utils
 import modeling
 import tokenization
 
@@ -295,7 +296,8 @@ def convert_examples_to_features(examples, seq_length, tokenizer):
       tf.logging.info("tokens: %s" % " ".join(
           [tokenization.printable_text(x) for x in tokens]))
       tf.logging.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
-      tf.logging.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
+      tf.logging.info("input_mask: %s" %
+                      " ".join([str(x) for x in input_mask]))
       tf.logging.info(
           "input_type_ids: %s" % " ".join([str(x) for x in input_type_ids]))
 
@@ -376,10 +378,14 @@ def main(_):
           num_shards=FLAGS.num_tpu_cores,
           per_host_input_for_training=is_per_host))
 
-  examples = read_examples(FLAGS.input_file)
+  features = kernel_utils.get_obj_or_dump("toxic_commnent_text_features.pkl")
 
-  features = convert_examples_to_features(
-      examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
+  if features is None:
+      examples = read_examples(FLAGS.input_file)
+      features = convert_examples_to_features(
+          examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
+      kernel_utils.get_obj_or_dump(
+          "toxic_commnent_text_features.pkl", default=features)
 
   unique_id_to_feature = {}
 
