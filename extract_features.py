@@ -368,23 +368,23 @@ def main(_):
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
 
   tokenizer = tokenization.FullTokenizer(
-      vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
+    vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
 
   is_per_host = tf.estimator.tpu.InputPipelineConfig.PER_HOST_V2
   run_config = tf.estimator.tpu.RunConfig(
-      master=FLAGS.master,
-      tpu_config=tf.estimator.tpu.TPUConfig(
-          num_shards=FLAGS.num_tpu_cores,
-          per_host_input_for_training=is_per_host))
+    master=FLAGS.master,
+    tpu_config=tf.estimator.tpu.TPUConfig(
+        num_shards=FLAGS.num_tpu_cores,
+        per_host_input_for_training=is_per_host))
 
   features = kernel_utils.get_obj_or_dump("toxic_commnent_text_features.pkl")
 
   if features is None:
-      examples = read_examples(FLAGS.input_file)
-      features = convert_examples_to_features(
-          examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
-      kernel_utils.get_obj_or_dump(
-          "toxic_commnent_text_features.pkl", default=features)
+    examples = read_examples(FLAGS.input_file)
+    features = convert_examples_to_features(
+      examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
+    kernel_utils.get_obj_or_dump(
+      "toxic_commnent_text_features.pkl", default=features)
 
   ipdb.set_trace()
   unique_id_to_feature = {}
