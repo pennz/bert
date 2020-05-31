@@ -27,8 +27,6 @@ import modeling
 import tokenization
 import tensorflow.compat.v1 as tf
 
-import ipdb
-
 flags = tf.flags
 
 FLAGS = flags.FLAGS
@@ -405,7 +403,6 @@ def main(_):
 
   input_fn = input_fn_builder(
       features=features, seq_length=FLAGS.max_seq_length)
-  ipdb.set_trace()
 
   with codecs.getwriter("utf-8")(tf.gfile.Open(FLAGS.output_file,
                                                "w")) as writer:
