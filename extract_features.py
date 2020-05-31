@@ -375,15 +375,20 @@ def main(_):
           num_shards=FLAGS.num_tpu_cores,
           per_host_input_for_training=is_per_host))
 
-  examples = read_examples(FLAGS.input_file)
+  path='/kaggle/input/jigsaw-multilingula-toxicity-token-encoded/features.pkl'
+  try:
+    with open(path, "rb") as f:
+      features= pickle.load(f)
+  except Exception as e:
+      raise e
+  # examples = read_examples(FLAGS.input_file)
 
-  features = convert_examples_to_features(
-      examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
+  # features = convert_examples_to_features(
+  #     examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
+  # with open("features.pkl", "wb") as f:
+  #   pickle.dump(features, f)
 
   unique_id_to_feature = {}
-
-  with open("features.pkl", "wb") as f:
-    pickle.dump(features, f)
 
   for feature in features:
     unique_id_to_feature[feature.unique_id] = feature
