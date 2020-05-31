@@ -360,7 +360,6 @@ def read_examples(input_file):
 
 
 def main(_):
-  import ipdb
   tf.logging.set_verbosity(tf.logging.DEBUG)
 
   layer_indexes = [int(x) for x in FLAGS.layers.split(",")]
@@ -386,7 +385,6 @@ def main(_):
     utils.get_obj_or_dump(
       "toxic_commnent_text_features.pkl", default=features)
 
-  ipdb.set_trace()
   unique_id_to_feature = {}
 
   for feature in features:
