@@ -14,18 +14,17 @@
 # limitations under the License.
 """Extract pre-computed feature vectors from BERT."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import codecs
 import collections
 import json
 import re
 
+import tensorflow.compat.v1 as tf
+
 import modeling
 import tokenization
-import tensorflow.compat.v1 as tf
 
 flags = tf.flags
 
@@ -359,6 +358,8 @@ def read_examples(input_file):
 
 
 def main(_):
+  import ipdb
+  ipdb.set_trace()
   tf.logging.set_verbosity(tf.logging.DEBUG)
 
   layer_indexes = [int(x) for x in FLAGS.layers.split(",")]
