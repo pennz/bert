@@ -23,7 +23,7 @@ import re
 
 import tensorflow.compat.v1 as tf
 
-import kaggle_runner.utils.kernel_utils
+import kaggle_runner.utils.kernel_utils as utils
 import modeling
 import tokenization
 
@@ -377,13 +377,13 @@ def main(_):
         num_shards=FLAGS.num_tpu_cores,
         per_host_input_for_training=is_per_host))
 
-  features = kernel_utils.get_obj_or_dump("toxic_commnent_text_features.pkl")
+  features = utils.get_obj_or_dump("toxic_commnent_text_features.pkl")
 
   if features is None:
     examples = read_examples(FLAGS.input_file)
     features = convert_examples_to_features(
       examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
-    kernel_utils.get_obj_or_dump(
+    utils.get_obj_or_dump(
       "toxic_commnent_text_features.pkl", default=features)
 
   ipdb.set_trace()
