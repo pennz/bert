@@ -14,20 +14,18 @@
 # limitations under the License.
 """Extract pre-computed feature vectors from BERT."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import codecs
 import collections
 import json
 import re
 
-import modeling
-import tokenization
+import ipdb
 import tensorflow.compat.v1 as tf
 
-import ipdb
+import modeling
+import tokenization
 
 flags = tf.flags
 
@@ -298,7 +296,8 @@ def convert_examples_to_features(examples, seq_length, tokenizer):
       tf.logging.info("tokens: %s" % " ".join(
           [tokenization.printable_text(x) for x in tokens]))
       tf.logging.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
-      tf.logging.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
+      tf.logging.info("input_mask: %s" %
+                      " ".join([str(x) for x in input_mask]))
       tf.logging.info(
           "input_type_ids: %s" % " ".join([str(x) for x in input_type_ids]))
 
@@ -377,6 +376,7 @@ def main(_):
           num_shards=FLAGS.num_tpu_cores,
           per_host_input_for_training=is_per_host))
 
+  ipdb.set_trace()
   examples = read_examples(FLAGS.input_file)
 
   features = convert_examples_to_features(
