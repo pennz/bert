@@ -26,6 +26,7 @@ import tensorflow.compat.v1 as tf
 
 import modeling
 import tokenization
+from kaggle_runner.utils import tpu
 
 flags = tf.flags
 
@@ -205,8 +206,11 @@ def model_fn_builder(bert_config, init_checkpoint, layer_indexes, use_tpu,
     for (i, layer_index) in enumerate(layer_indexes):
       predictions["layer_output_%d" % i] = all_layers[layer_index]
 
-    output_spec = tf.estimator.tpu.TPUEstimatorSpec(
-        mode=mode, predictions=predictions, scaffold_fn=scaffold_fn)
+    if tpu.strategy is None:
+      raise Exception("TPU error")
+    else:
+      with tpu.strategy.scope():
+        output_spec = tf.estimator.tpu.TPUEstimatorSpec(mode=mode, predictions=predictions, scaffold_fn=scaffold_fn)
 
     return output_spec
 
