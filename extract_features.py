@@ -27,6 +27,7 @@ import tensorflow.compat.v1 as tf
 import modeling
 import tokenization
 from kaggle_runner.utils import tpu
+from kaggle_runner import may_debug
 
 flags = tf.flags
 
@@ -159,6 +160,7 @@ def model_fn_builder(bert_config, init_checkpoint, layer_indexes, use_tpu,
     input_mask = features["input_mask"]
     input_type_ids = features["input_type_ids"]
 
+    may_debug()
     model = modeling.BertModel(
         config=bert_config,
         is_training=False,
