@@ -376,9 +376,9 @@ def main(_):
 
   is_per_host = tf.estimator.tpu.InputPipelineConfig.PER_HOST_V2
 
-  if tpu is not None:
+  if tpu.tpu_resolver is not None:
     run_config = tf.estimator.tpu.RunConfig(
-        cluster=tpu,
+        cluster=tpu.tpu_resolver,
         master=FLAGS.master,
         tpu_config=tf.estimator.tpu.TPUConfig(
             num_shards=FLAGS.num_tpu_cores,
