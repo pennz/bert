@@ -26,8 +26,8 @@ import tensorflow.compat.v1 as tf
 
 import modeling
 import tokenization
-from kaggle_runner.utils import tpu
 from kaggle_runner import may_debug
+from kaggle_runner.utils import tpu
 
 flags = tf.flags
 
@@ -209,7 +209,7 @@ def model_fn_builder(bert_config, init_checkpoint, layer_indexes, use_tpu,
       predictions["layer_output_%d" % i] = all_layers[layer_index]
 
     if tpu.strategy is None:
-      raise Exception("TPU error")
+      raise Exception("TPU strategy error")
     else:
       with tpu.strategy.scope():
         output_spec = tf.estimator.tpu.TPUEstimatorSpec(mode=mode, predictions=predictions, scaffold_fn=scaffold_fn)
@@ -375,11 +375,21 @@ def main(_):
       vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
 
   is_per_host = tf.estimator.tpu.InputPipelineConfig.PER_HOST_V2
-  run_config = tf.estimator.tpu.RunConfig(
-      master=FLAGS.master,
-      tpu_config=tf.estimator.tpu.TPUConfig(
-          num_shards=FLAGS.num_tpu_cores,
-          per_host_input_for_training=is_per_host))
+
+  if tpu is not None:
+    run_config = tf.estimator.tpu.RunConfig(
+        cluster=tpu,
+        master=FLAGS.master,
+        tpu_config=tf.estimator.tpu.TPUConfig(
+            num_shards=FLAGS.num_tpu_cores,
+            per_host_input_for_training=is_per_host))
+  else:
+    run_config = tf.estimator.tpu.RunConfig(
+        master=FLAGS.master,
+        tpu_config=tf.estimator.tpu.TPUConfig(
+            num_shards=FLAGS.num_tpu_cores,
+            per_host_input_for_training=is_per_host))
+  may_debug()
 
   path='/kaggle/input/jigsaw-multilingula-toxicity-token-encoded/features.pkl'
   try:
