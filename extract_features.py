@@ -27,7 +27,14 @@ import tensorflow.compat.v1 as tf
 import modeling
 import tokenization
 from kaggle_runner import may_debug
-from kaggle_runner.utils import tpu
+from kaggle_runner.utils.tpu import BATCH_SIZE, strategy, tpu_resolver
+
+#if DEBUG:
+tf.executing_eagerly()
+# Dataloading related
+AUTO = tf.data.experimental.AUTOTUNE
+
+# ### Load the training, validation, and testing datasets
 
 flags = tf.flags
 
@@ -208,10 +215,10 @@ def model_fn_builder(bert_config, init_checkpoint, layer_indexes, use_tpu,
     for (i, layer_index) in enumerate(layer_indexes):
       predictions["layer_output_%d" % i] = all_layers[layer_index]
 
-    if tpu.strategy is None:
+    if strategy is None:
       raise Exception("TPU strategy error")
     else:
-      with tpu.strategy.scope():
+      with strategy.scope():
         output_spec = tf.estimator.tpu.TPUEstimatorSpec(mode=mode, predictions=predictions, scaffold_fn=scaffold_fn)
 
     return output_spec
@@ -376,9 +383,9 @@ def main(_):
 
   is_per_host = tf.estimator.tpu.InputPipelineConfig.PER_HOST_V2
 
-  if tpu.tpu_resolver is not None:
+  if tpu_resolver is not None:
     run_config = tf.estimator.tpu.RunConfig(
-        cluster=tpu.tpu_resolver,
+        cluster=tpu_resolver,
         master=FLAGS.master,
         tpu_config=tf.estimator.tpu.TPUConfig(
             num_shards=FLAGS.num_tpu_cores,
