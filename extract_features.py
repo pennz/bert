@@ -16,6 +16,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+import os
 import codecs
 import collections
 import json
@@ -39,6 +40,8 @@ AUTO = tf.data.experimental.AUTOTUNE
 flags = tf.flags
 
 FLAGS = flags.FLAGS
+
+flags.DEFINE_string("stage_detail", None, "")
 
 flags.DEFINE_string("input_file", None, "")
 
@@ -398,19 +401,26 @@ def main(_):
             per_host_input_for_training=is_per_host))
   may_debug()
 
-  path='/kaggle/input/jigsaw-multilingula-toxicity-token-encoded/features.pkl'
-  try:
-    with open(path, "rb") as f:
-      features= pickle.load(f)[:100]
-      tf.logging.info("Feature loaded")
-  except Exception as e:
-    raise e
-  # examples = read_examples(FLAGS.input_file)
+  if FLAGS.stage_detail is None:
+    path='/kaggle/input/jigsaw-multilingula-toxicity-token-encoded/features.pkl'
+    try:
+      with open(path, "rb") as f:
+        features= pickle.load(f)[:100]
+        tf.logging.info("Feature loaded")
+    except Exception as e:
+      raise e
+  elif FLAGS.stage_detail == "pickle":
+    may_debug()
+    examples = read_examples(FLAGS.input_file)
 
-  # features = convert_examples_to_features(
-  #     examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
-  # with open("features.pkl", "wb") as f:
-  #   pickle.dump(features, f)
+    features = convert_examples_to_features(
+        examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
+    with open("features.pkl", "wb") as f:
+      pickle.dump(features, f)
+
+    return
+  else:
+    raise Exception("Stage detail with %s not supported" % FLAGS.stage_detail)
 
   unique_id_to_feature = {}
 
