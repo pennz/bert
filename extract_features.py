@@ -398,7 +398,6 @@ def main(_):
         tpu_config=tf.estimator.tpu.TPUConfig(
             num_shards=FLAGS.num_tpu_cores,
             per_host_input_for_training=is_per_host))
-  may_debug()
 
   if FLAGS.stage_detail is None:
     path='/kaggle/input/jigsaw-multilingula-toxicity-token-encoded/features.pkl'
