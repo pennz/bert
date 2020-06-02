@@ -401,7 +401,7 @@ def main(_):
   path='/kaggle/input/jigsaw-multilingula-toxicity-token-encoded/features.pkl'
   try:
     with open(path, "rb") as f:
-      features= pickle.load(f)
+      features= pickle.load(f)[:100]
       tf.logging.info("Feature loaded")
   except Exception as e:
     raise e
