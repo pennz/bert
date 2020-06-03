@@ -374,7 +374,7 @@ def read_examples(input_file):
   return examples
 
 
-def load_data(stage_detail, input_file, max_seq_length, tokenizer):
+def load_data(stage_detail, input_file, max_seq_length, tokenizer, output):
   may_debug()
 
   if stage_detail is None:
@@ -392,9 +392,9 @@ def load_data(stage_detail, input_file, max_seq_length, tokenizer):
 
     features = convert_examples_to_features(
         examples=examples, seq_length=max_seq_length, tokenizer=tokenizer)
-    with open("features.pkl", "wb") as f:
+    with open(output, "wb") as f:
       pickle.dump(features, f)
-      tf.logging.info("features pickled")
+      tf.logging.info("features pickled to %s" % output)
 
     sys.exit()
   else:
