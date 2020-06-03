@@ -415,6 +415,7 @@ def main(_):
         examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
     with open("features.pkl", "wb") as f:
       pickle.dump(features, f)
+      tf.logging.info("features pickled")
 
     return
   else:
