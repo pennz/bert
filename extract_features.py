@@ -375,6 +375,8 @@ def read_examples(input_file):
 
 
 def load_data(stage_detail, input_file, max_seq_length, tokenizer):
+  may_debug()
+
   if stage_detail is None:
     path='/kaggle/input/jigsaw-multilingula-toxicity-token-encoded/features.pkl'
     try:
@@ -386,7 +388,6 @@ def load_data(stage_detail, input_file, max_seq_length, tokenizer):
     except Exception as e:
       raise e
   elif stage_detail == "pickle":
-    may_debug()
     examples = read_examples(input_file)
 
     features = convert_examples_to_features(
