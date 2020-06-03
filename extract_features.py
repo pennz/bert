@@ -25,8 +25,8 @@ import sys
 
 import tensorflow.compat.v1 as tf
 
-import modeling
-import tokenization
+from . import modeling
+from . import tokenization
 from kaggle_runner import may_debug
 from kaggle_runner.utils.tpu import BATCH_SIZE, strategy, tpu_resolver
 
