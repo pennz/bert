@@ -21,6 +21,7 @@ import collections
 import json
 import pickle
 import re
+import sys
 
 import tensorflow.compat.v1 as tf
 
@@ -373,6 +374,39 @@ def read_examples(input_file):
   return examples
 
 
+def load_data(stage_detail, input_file, max_seq_length, tokenizer):
+  if stage_detail is None:
+    path='/kaggle/input/jigsaw-multilingula-toxicity-token-encoded/features.pkl'
+    try:
+      with open(path, "rb") as f:
+        features= pickle.load(f)[:100]  # try with less data
+        tf.logging.info("Feature loaded")
+
+        return features
+    except Exception as e:
+      raise e
+  elif stage_detail == "pickle":
+    may_debug()
+    examples = read_examples(input_file)
+
+    features = convert_examples_to_features(
+        examples=examples, seq_length=max_seq_length, tokenizer=tokenizer)
+    with open("features.pkl", "wb") as f:
+      pickle.dump(features, f)
+      tf.logging.info("features pickled")
+
+    sys.exit()
+  else:
+    raise Exception("Stage detail with %s not supported" % stage_detail)
+
+
+def get_tokenizer(vocab_file, do_lower_case=False):
+  tokenizer = tokenization.FullTokenizer(
+      vocab_file=vocab_file, do_lower_case=do_lower_case)
+
+  return tokenizer
+
+
 def main(_):
   tf.logging.set_verbosity(tf.logging.DEBUG)
 
@@ -380,10 +414,12 @@ def main(_):
 
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
 
-  tokenizer = tokenization.FullTokenizer(
+  tokenizer = get_tokenizer(
       vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
 
   is_per_host = tf.estimator.tpu.InputPipelineConfig.PER_HOST_V2
+
+  features = load_data(FLAGS.stage_detail, FLAGS.input_file, FLAGS.max_seq_length, tokenizer)
 
   if tpu_resolver is not None:
     run_config = tf.estimator.tpu.RunConfig(
@@ -398,28 +434,6 @@ def main(_):
         tpu_config=tf.estimator.tpu.TPUConfig(
             num_shards=FLAGS.num_tpu_cores,
             per_host_input_for_training=is_per_host))
-
-  if FLAGS.stage_detail is None:
-    path='/kaggle/input/jigsaw-multilingula-toxicity-token-encoded/features.pkl'
-    try:
-      with open(path, "rb") as f:
-        features= pickle.load(f)[:100]
-        tf.logging.info("Feature loaded")
-    except Exception as e:
-      raise e
-  elif FLAGS.stage_detail == "pickle":
-    may_debug()
-    examples = read_examples(FLAGS.input_file)
-
-    features = convert_examples_to_features(
-        examples=examples, seq_length=FLAGS.max_seq_length, tokenizer=tokenizer)
-    with open("features.pkl", "wb") as f:
-      pickle.dump(features, f)
-      tf.logging.info("features pickled")
-
-    return
-  else:
-    raise Exception("Stage detail with %s not supported" % FLAGS.stage_detail)
 
   unique_id_to_feature = {}
 
