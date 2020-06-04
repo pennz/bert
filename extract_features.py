@@ -375,8 +375,6 @@ def read_examples(input_file):
 
 
 def load_data(stage_detail, input_file, max_seq_length, tokenizer, output):
-  may_debug()
-
   if stage_detail is 'load_tokens':
     path=input_file
     try:
