@@ -170,7 +170,6 @@ def model_fn_builder(bert_config, init_checkpoint, layer_indexes, use_tpu,
     input_mask = features["input_mask"]
     input_type_ids = features["input_type_ids"]
 
-    may_debug()
     model = modeling.BertModel(
         config=bert_config,
         is_training=False,
