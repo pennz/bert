@@ -381,7 +381,7 @@ def load_data(stage_detail, input_file, max_seq_length, tokenizer, output):
     path=input_file
     try:
       with open(path, "rb") as f:
-        features= pickle.load(f)[:100]  # try with less data
+        features= pickle.load(f)  # try with less data
         tf.logging.info("Feature loaded")
 
         return features
