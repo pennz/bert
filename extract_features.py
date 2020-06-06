@@ -28,7 +28,6 @@ import tensorflow.compat.v1 as tf
 from . import modeling
 from . import tokenization
 from kaggle_runner import may_debug
-from kaggle_runner.utils.tpu import BATCH_SIZE, strategy, tpu_resolver
 
 #if DEBUG:
 tf.executing_eagerly()
@@ -216,6 +215,8 @@ def model_fn_builder(bert_config, init_checkpoint, layer_indexes, use_tpu,
 
     for (i, layer_index) in enumerate(layer_indexes):
       predictions["layer_output_%d" % i] = all_layers[layer_index]
+
+    from kaggle_runner.utils.tpu import strategy, tpu_resolver
 
     if strategy is None:
       raise Exception("TPU strategy error")
@@ -418,6 +419,8 @@ def main(_):
   is_per_host = tf.estimator.tpu.InputPipelineConfig.PER_HOST_V2
 
   features = load_data(FLAGS.stage_detail, FLAGS.input_file, FLAGS.max_seq_length, tokenizer)
+
+  from kaggle_runner.utils.tpu import strategy, tpu_resolver
 
   if tpu_resolver is not None:
     run_config = tf.estimator.tpu.RunConfig(
